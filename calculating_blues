@@ -1,0 +1,60 @@
+#setting up the working directory
+setwd("~/Desktop/for_creating _GIThub/pheno_file")
+
+#loading the data
+ft_df<- read.csv("Data without outliers.csv")
+
+library(tibble)
+library(dplyr)
+library(data.table)
+library(lme4)
+library(ggplot2)
+
+#changing the details into factors instead of numeric
+ft_df$Plot<-as.factor(ft_df$Plot)
+ft_df$Rep<-as.factor(ft_df$Rep)
+ft_df$Row<-as.factor(ft_df$Row)
+ft_df$Column<-as.factor(ft_df$Column)
+ft_df$GenoIDFromMiaoEtAl<-as.factor(ft_df$GenoIDFromMiaoEtAl)
+ft_df$PINumberNumber<-as.factor(ft_df$PINumberNumber)
+ft_df$SorghumConversionID<-as.factor(ft_df$SorghumConversionID)
+ft_df$SAPINumberD<-as.factor(ft_df$SAPINumberD)
+
+#checking the best model for my blue.mod calculation 
+fit1=lmer(DaysToFlower~1|PINumberNumber, data= ft_df)
+
+fit2=lmer(DaysToFlower~(1|PINumber) +(1|Row), data=ft_df)
+
+fit3=lmer(DaysToFlower ~ (1|PINumber) + (1|Row) + (1|Column), data = ft_df)
+
+fit4=lmer(DaysToFlower ~ (1|PINumber)+ (1|Row) + (1|Column) + (1|Rep), data=ft_df)
+
+anova(fit1, fit2, fit3, fit4)
+
+#the best model will be the least number of the least number when we run anova in this case.. the row and the column
+blue.mod<- lmer(DaysToFlower ~ PINumber + (1|Row) + (1|Column), data = ft_df)
+
+#calculating the intercept of the blues
+
+int<-fixef(blue.mod)[1]
+
+int
+
+blues<-fixef(blue.mod)
+
+#adding the intercept to the blues
+blues[-1]<-(blues[-1])+(int)
+
+#checking if everything is going right
+names(blues)[1]<-levels(ft_df$PINumber)[1]
+
+gsub("Genotype", "", names(blues))[1:10]
+
+blues[1:10]
+#converting it into the dataframe
+blues<-data.frame(names(blues), blues)
+#removing the intercept from the top heading
+blues_ft<- blues[-1,]
+
+#saving the file in the csv format in the required working directory
+write.csv(blues_ft, "bluesHN_2021.csv", row.names = FALSE)
