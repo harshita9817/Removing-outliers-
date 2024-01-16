@@ -8,8 +8,8 @@ ft_df$...12<-NULL
 ft_df$...13<-NULL
 
 # Remove rows with NA values in the 'DaysToFlower' column
-ft_df2<- subset(ft_df, !is.na(DaysToFlower))
-
+#ft_df2<- subset(ft_df, !is.na(DaysToFlower))
+ft_df2 <- ft_df[!is.na(ft_df$`Plant Height`), ]
 # Calculate Q1 and Q3 for the 'days_to_flower' column
 Q1 <- quantile(ft_df2$DaysToFlower, 0.25)
 Q3 <- quantile(ft_df2$DaysToFlower, 0.75)
